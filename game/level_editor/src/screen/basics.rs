@@ -43,20 +43,20 @@ impl Polygon {
         // if their & result is not 0
         else if (start_flag & end_flag) != 0 {
             return false;
-        } else {
-            // At least one of the points is not in the range
-            if (start_flag & CLIPLEFT) != 0 {
-                self.start.y = min_y;
-            } else if (start_flag & CLIPRIGHT) != 0 {
-                self.start.y = max_y;
-            }
-
-            if (end_flag & CLIPLEFT) != 0 {
-                self.end.y = min_y;
-            } else if (end_flag & CLIPRIGHT) != 0 {
-                self.end.y = max_y;
-            }
         }
+        // At least one of the points is not in the range
+        if (start_flag & CLIPLEFT) != 0 {
+            self.start.y = min_y;
+        } else if (start_flag & CLIPRIGHT) != 0 {
+            self.start.y = max_y;
+        }
+
+        if (end_flag & CLIPLEFT) != 0 {
+            self.end.y = min_y;
+        } else if (end_flag & CLIPRIGHT) != 0 {
+            self.end.y = max_y;
+        }
+
         true
     }
 
@@ -101,48 +101,46 @@ impl Polygon {
                 return false;
             }
             // at least one point is inside rect
-            else {
-                // pick one side to clip
-                let mut x = 0.;
-                let mut y = 0.;
 
-                let outcode= if start_flag > end_flag {
-                    start_flag
-                } else {
-                    end_flag
-                };
+            // pick one side to clip
+            let mut x = 0.;
+            let mut y = 0.;
 
-                let x0 = self.start.x;
-                let x1 = self.end.x;
-                let y0 = self.start.y;
-                let y1 = self.end.y;
+            let outcode = if start_flag > end_flag {
+                start_flag
+            } else {
+                end_flag
+            };
 
-                if outcode & CLIPUPPER != 0 {
-                    x = x0 + (x1 - x0) * (max_y - y0) / (y1 - y0);
-                    y = max_y;
-                } else if outcode & CLIPLOWER != 0 {
-                    x = x0 + (x1 - x0) * (min_y - y0) / (y1 - y0);
-                    y = min_y;
-                } else if outcode & CLIPRIGHT != 0 {
-                    y = y0 + (y1 - y0) * (max_x - x0) / (x1 - x0);
-                    x = max_x;
-                } else if outcode & CLIPLEFT != 0 {
-                    y = y0 + (y1 - y0) * (min_x - x0) / (x1 - x0);
-                    x = min_x;
-                }
+            let x0 = self.start.x;
+            let x1 = self.end.x;
+            let y0 = self.start.y;
+            let y1 = self.end.y;
 
-                // move the line points
-                if outcode == start_flag {
-                    self.start.x = x;
-                    self.start.y = y;
-                    start_flag =
-                        Self::outcode((self.start.x, self.start.y), (min_x, max_x), (min_y, max_y));
-                } else {
-                    self.end.x = x;
-                    self.end.y = y;
-                    end_flag =
-                        Self::outcode((self.end.x, self.end.y), (min_x, max_x), (min_y, max_y));
-                }
+            if outcode & CLIPUPPER != 0 {
+                x = x0 + (x1 - x0) * (max_y - y0) / (y1 - y0);
+                y = max_y;
+            } else if outcode & CLIPLOWER != 0 {
+                x = x0 + (x1 - x0) * (min_y - y0) / (y1 - y0);
+                y = min_y;
+            } else if outcode & CLIPRIGHT != 0 {
+                y = y0 + (y1 - y0) * (max_x - x0) / (x1 - x0);
+                x = max_x;
+            } else if outcode & CLIPLEFT != 0 {
+                y = y0 + (y1 - y0) * (min_x - x0) / (x1 - x0);
+                x = min_x;
+            }
+
+            // move the line points
+            if outcode == start_flag {
+                self.start.x = x;
+                self.start.y = y;
+                start_flag =
+                    Self::outcode((self.start.x, self.start.y), (min_x, max_x), (min_y, max_y));
+            } else {
+                self.end.x = x;
+                self.end.y = y;
+                end_flag = Self::outcode((self.end.x, self.end.y), (min_x, max_x), (min_y, max_y));
             }
         }
     }
@@ -211,8 +209,7 @@ const EPSILON: f32 = 10e-4; // precision for the tests
 
 impl PartialEq for Vector {
     fn eq(&self, other: &Self) -> bool {
-        compare_epsilon(self.x, other.x, EPSILON)
-            && compare_epsilon(self.y, other.y, EPSILON)
+        compare_epsilon(self.x, other.x, EPSILON) && compare_epsilon(self.y, other.y, EPSILON)
     }
 }
 

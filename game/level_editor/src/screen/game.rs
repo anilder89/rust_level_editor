@@ -1,4 +1,7 @@
-use super::{basics::*, GameScreen, Key};
+use super::{
+    basics::{Player, Point, Polygon, Vector},
+    GameScreen, Key,
+};
 
 const PLYSPD: f32 = 5.0;
 
@@ -23,7 +26,7 @@ pub struct GameState {
 }
 
 impl GameState {
-    fn player_can_move(&self, new_position: &Point) -> bool {
+    pub fn player_can_move(&self, new_position: &Point) -> bool {
         let mut hits_some_wall = false;
         self.walls.iter().for_each(|wall| {
             hits_some_wall = hits_some_wall
@@ -116,12 +119,85 @@ impl GameState {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+
     #[test]
     fn rendering() {
         todo!("Fill me!");
     }
     #[test]
     fn player_movement() {
-        todo!("Fill me!");
+        let test_level = GameState {
+            walls: vec![
+                Wall {
+                    start: Point { x: -125.0, y: 77.0 },
+                    end: Point { x: -89.0, y: -14.0 },
+                    color: Color { r: 0, g: 0, b: 0 },
+                },
+                Wall {
+                    start: Point { x: -89.0, y: -14.0 },
+                    end: Point { x: -33.0, y: -74.0 },
+                    color: Color { r: 0, g: 0, b: 0 },
+                },
+                Wall {
+                    start: Point { x: -33.0, y: -74.0 },
+                    end: Point { x: 56.0, y: -128.0 },
+                    color: Color { r: 0, g: 0, b: 0 },
+                },
+                Wall {
+                    start: Point { x: 56.0, y: -128.0 },
+                    end: Point { x: 125.0, y: -16.0 },
+                    color: Color { r: 0, g: 0, b: 0 },
+                },
+                Wall {
+                    start: Point { x: 125.0, y: -16.0 },
+                    end: Point { x: 171.0, y: 58.0 },
+                    color: Color { r: 0, g: 0, b: 0 },
+                },
+                Wall {
+                    start: Point { x: 171.0, y: 58.0 },
+                    end: Point { x: 75.0, y: 77.0 },
+                    color: Color { r: 0, g: 0, b: 0 },
+                },
+                Wall {
+                    start: Point { x: -22.0, y: 76.0 },
+                    end: Point { x: -125.0, y: 77.0 },
+                    color: Color { r: 0, g: 0, b: 0 },
+                },
+            ],
+            player: Player {
+                position: Point { x: 0.0, y: 0.0 },
+                angle: 0.0,
+            },
+        };
+
+        let test_target_positions = vec![
+            Point { x: 10., y: 10. },
+            Point { x: 100., y: 100. },
+            Point { x: -150., y: 10. },
+            Point { x: -10., y: -8. },
+            Point { x: 2., y: -30. },
+            Point { x: -5., y: 9. },
+            Point { x: -100., y: -100. },
+            Point { x: 3., y: 2. },
+            Point { x: -10., y: -8. },
+            Point { x: 0., y: 800. },
+        ];
+
+        let results_to_test = vec![
+            true, false, false, true, true, true, false, true, true, true,
+        ];
+
+        test_target_positions
+            .iter()
+            .enumerate()
+            .for_each(|(index, position)| {
+                let calculated_result = test_level.player_can_move(position);
+                assert_eq!(
+                    calculated_result, results_to_test[index],
+                    "Boolean error for {}, result being: {} at index {}",
+                    calculated_result, results_to_test[index], index
+                );
+            });
     }
 }

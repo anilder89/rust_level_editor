@@ -1,4 +1,4 @@
-use super::basics::*;
+use super::basics::{Player, Point, Vector};
 // for the level editor it is fine to use
 // the macroquad lib as much as possibble
 use macroquad::prelude::{Color, GREEN};
@@ -62,7 +62,14 @@ impl LevelState {
         };
         let is_selecting = p_node.index_node(&self.nodes);
         // attemp to select
-        if is_selecting != NS {
+        if is_selecting == NS {
+            // click on empty space, just add another node
+            self.nodes.push(Node {
+                position: p_node.position,
+                radius: NR,
+                selected: false,
+            });
+        } else {
             // check if it was selected
             if self.selected == is_selecting {
                 // remove selection
@@ -95,13 +102,6 @@ impl LevelState {
                     self.selected = NS;
                 }
             }
-        } else {
-            // click on empty space, just add another node
-            self.nodes.push(Node {
-                position: p_node.position,
-                radius: NR,
-                selected: false,
-            });
         }
     }
     // input is a right click on the level screen
@@ -125,7 +125,7 @@ impl LevelState {
             // remove all lines corresponding to the node
             self.lines.retain(|line| {
                 let start_position = (line.start.x - removed_node.position.x).abs() < f32::EPSILON
-                    && line.start.y == removed_node.position.y;
+                    && (line.start.y - removed_node.position.y).abs() < f32::EPSILON;
                 let end_position = (line.end.x - removed_node.position.x).abs() < f32::EPSILON
                     && (line.end.y - removed_node.position.y).abs() < f32::EPSILON;
 
@@ -139,7 +139,11 @@ impl LevelState {
 #[cfg(test)]
 mod test {
     #[test]
-    fn all_lines_on_nodes() {
+    fn import_level() {
+        todo!("Fill me!");
+    }
+    #[test]
+    fn export_level() {
         todo!("Fill me!");
     }
 }

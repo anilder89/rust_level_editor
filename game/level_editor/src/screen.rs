@@ -1,6 +1,6 @@
 // need vector for player direction drawing
 pub mod basics;
-use basics::*;
+use basics::{Point, Polygon, Vector};
 
 // load the game implementation
 pub mod game;
@@ -82,9 +82,9 @@ impl GameScreen {
     }
 
     pub fn input(&mut self, key_q: &[Key]) {
-        key_q.iter().for_each(|input| {
+        for input in key_q.iter() {
             self.game_state.input(input);
-        });
+        }
     }
 }
 
@@ -198,7 +198,7 @@ impl LevelScreen {
     }
 
     pub fn input(&mut self, mouse_q: &[Mouse], y_correction: f32) {
-        mouse_q.iter().for_each(|input| {
+        for input in mouse_q.iter() {
             // only accept input on the LevelScreen
             if input.position.y > y_correction {
                 // do correction because clicks are "relative" to the player
@@ -229,7 +229,7 @@ impl LevelScreen {
                     }
                 }
             }
-        });
+        }
     }
 }
 

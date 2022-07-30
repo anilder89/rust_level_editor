@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 
 // prep level editor screens
 mod screen;
-use screen::*;
+use screen::{Button, GameScreen, Key, LevelScreen, Mouse, ScreenPoint, SplitScreen};
 
 // start the level editor
 #[macroquad::main("Level Editor")]
@@ -36,9 +36,7 @@ async fn main() {
 
         // draw screens
         split_screen.top_screen.draw();
-        split_screen
-            .bottom_screen
-            .draw(split_screen.split_position);
+        split_screen.bottom_screen.draw(split_screen.split_position);
 
         ////////////////////////////////////////////////////
         // Keyboard Input and Player Movement Logic       //
