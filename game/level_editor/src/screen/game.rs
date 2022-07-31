@@ -133,8 +133,8 @@ impl GameState {
                 let y_e_i = near * real_wall_end.y / real_wall_end.x;
 
                 // for abs interpolation
-                let d_X = real_wall_end.x - real_wall_start.x;
-                let d_Y = real_wall_end.y - real_wall_start.y;
+                let d_x = real_wall_end.x - real_wall_start.x;
+                let d_y = real_wall_end.y - real_wall_start.y;
 
                 // clip the projection to screen size
                 let mut clip_screen = Polygon {
@@ -148,20 +148,26 @@ impl GameState {
                     let pixel_start = clip_screen.start.y * pixel_size;
                     let pixel_end = clip_screen.end.y * pixel_size;
 
-                    let mut pixel = pixel_start;
-                    while pixel < pixel_end {
-                        let k = (pixel / pixel_size) / near;
-                        let p_abs =
-                            (real_wall_start.y - real_wall_start.x * d_Y / d_X) / (k - d_Y / d_X);
-                        let pixel_index = (pixel + screen.frame.width / 2.) as usize;
+                    let (mut pixel, limit) = if pixel_start < pixel_end {
+                        (pixel_start, pixel_end)
+                    } else {
+                        (pixel_end, pixel_start)
+                    };
+                        while pixel < limit {
+                            let k = (pixel / pixel_size) / near;
+                            let p_abs = (real_wall_start.y - real_wall_start.x * d_y / d_x)
+                                / (k - d_y / d_x);
+                            let pixel_index = (pixel + screen.frame.width / 2.) as usize;
 
-                        if draw_buffer[pixel_index].1 == -1. || draw_buffer[pixel_index].1 > p_abs {
-                            draw_buffer[pixel_index].1 = p_abs;
-                            draw_buffer[pixel_index].0 = wall.color;
+                            if draw_buffer[pixel_index].1 + 1. < f32::EPSILON
+                                || draw_buffer[pixel_index].1 > p_abs
+                            {
+                                draw_buffer[pixel_index].1 = p_abs;
+                                draw_buffer[pixel_index].0 = wall.color;
+                            }
+                            pixel += 1.;
                         }
-                        pixel += 1.;
-                    }
-                } 
+                }
             }
         });
         draw_buffer
@@ -176,7 +182,7 @@ mod test {
     fn rendering() {
         // load level
         // TODO: load level from file
-        let test_level = GameState {
+        let _test_level = GameState {
             walls: vec![
                 Wall {
                     start: Point { x: -125.0, y: 77.0 },
