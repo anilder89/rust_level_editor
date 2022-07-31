@@ -5,8 +5,15 @@ use macroquad::prelude::*;
 mod screen;
 use screen::{Button, GameScreen, Key, LevelScreen, Mouse, ScreenPoint, SplitScreen};
 
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "Level Editor".to_owned(),
+        fullscreen: true,
+        ..Default::default()
+    }
+}
 // start the level editor
-#[macroquad::main("Level Editor")]
+#[macroquad::main(window_conf)]
 async fn main() {
     /////////////////////////////////////////////////////
     // Init Screens and States                         //
