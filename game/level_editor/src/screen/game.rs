@@ -27,27 +27,25 @@ pub struct GameState {
 
 impl GameState {
     pub fn player_can_move(&self, new_position: &Point) -> bool {
-        let hits_some_wall = self
-            .walls
-            .iter()
-            .map(|wall| {
-                self.player.hits_polygon(
-                    new_position,
-                    &Polygon {
-                        start: Point {
-                            x: wall.start.x,
-                            y: wall.start.y,
-                        },
-                        end: Point {
-                            x: wall.end.x,
-                            y: wall.end.y,
-                        },
+        for wall in self.walls.iter() {
+            if self.player.hits_polygon(
+                new_position,
+                &Polygon {
+                    start: Point {
+                        x: wall.start.x,
+                        y: wall.start.y,
                     },
-                )
-            })
-            .any(|hit| hit);
+                    end: Point {
+                        x: wall.end.x,
+                        y: wall.end.y,
+                    },
+                },
+            ) {
+                return false;
+            }
+        }
 
-        !hits_some_wall
+        true
     }
 }
 

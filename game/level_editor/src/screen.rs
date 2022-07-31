@@ -65,51 +65,52 @@ impl GameScreen {
     }
 
     pub fn draw(&self) {
-        let mut draw_index = 0.;
         let draw_buffer = self.game_state.render(self, 10., 800.);
 
         // the size is "fix"
-        while draw_index < self.frame.width {
-            let buffer_color = draw_buffer[draw_index as usize].0;
-            // draw left to right
-            let scale = 8. * 1600. / draw_buffer[draw_index as usize].1;
-            let cap_scale = if scale > self.frame.height / 2. {
-                self.frame.height / 2.
-            } else {
-                scale
-            };
-            macroquad::prelude::draw_rectangle(
-                draw_index,
-                self.frame.height / 2.,
-                1.,
-                -cap_scale,
-                macroquad::prelude::Color {
-                    r: buffer_color.r,
-                    g: buffer_color.g,
-                    b: buffer_color.b,
-                    a: 1.0,
-                },
-            );
-            macroquad::prelude::draw_rectangle(
-                draw_index,
-                self.frame.height / 2.,
-                1.,
-                cap_scale,
-                macroquad::prelude::Color {
-                    r: buffer_color.r,
-                    g: buffer_color.g,
-                    b: buffer_color.b,
-                    a: 1.0,
-                },
-            );
-            draw_index += 1.;
-        }
+        draw_buffer
+            .iter()
+            .enumerate()
+            .for_each(|(draw_index, draw_buffer)| {
+                let buffer_color = draw_buffer.0;
+                // draw left to right
+                let scale = 8. * 1600. / draw_buffer.1;
+                let cap_scale = if scale > self.frame.height / 2. {
+                    self.frame.height / 2.
+                } else {
+                    scale
+                };
+                macroquad::prelude::draw_rectangle(
+                    draw_index as f32,
+                    self.frame.height / 2.,
+                    1.,
+                    -cap_scale,
+                    macroquad::prelude::Color {
+                        r: buffer_color.r,
+                        g: buffer_color.g,
+                        b: buffer_color.b,
+                        a: 1.0,
+                    },
+                );
+                macroquad::prelude::draw_rectangle(
+                    draw_index as f32,
+                    self.frame.height / 2.,
+                    1.,
+                    cap_scale,
+                    macroquad::prelude::Color {
+                        r: buffer_color.r,
+                        g: buffer_color.g,
+                        b: buffer_color.b,
+                        a: 1.0,
+                    },
+                );
+            });
     }
 
     pub fn input(&mut self, key_q: &[Key]) {
-        for input in key_q.iter() {
+        key_q.iter().for_each(|input| {
             self.game_state.input(input);
-        }
+        });
     }
 }
 
