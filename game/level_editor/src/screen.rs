@@ -66,7 +66,7 @@ impl GameScreen {
 
     pub fn draw(&self) {
         let mut draw_index = 0.;
-        let draw_buffer = self.game_state.render(self, 10.,400.);
+        let draw_buffer = self.game_state.render(self, 10.,800.);
 
         // the size is "fix"
         while draw_index < self.frame.width {
