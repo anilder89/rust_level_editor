@@ -159,9 +159,7 @@ impl GameState {
                                 / (k - d_y / d_x);
                             let pixel_index = (pixel + screen.frame.width / 2.) as usize;
 
-                            if draw_buffer[pixel_index].1 + 1. < f32::EPSILON
-                                || draw_buffer[pixel_index].1 > p_abs
-                            {
+                            if pixel_index < draw_buffer.len() && (draw_buffer[pixel_index].1 + 1. < f32::EPSILON || draw_buffer[pixel_index].1 > p_abs) {
                                 draw_buffer[pixel_index].1 = p_abs;
                                 draw_buffer[pixel_index].0 = wall.color;
                             }

@@ -66,15 +66,18 @@ impl GameScreen {
 
     pub fn draw(&self) {
         let mut draw_index = 0.;
-        let draw_buffer = self.game_state.render(self, 10.,800.);
+        let draw_buffer = self.game_state.render(self, 10., 800.);
 
         // the size is "fix"
         while draw_index < self.frame.width {
             let buffer_color = draw_buffer[draw_index as usize].0;
             // draw left to right
-            let scale= 8. * 1600. / draw_buffer[draw_index as usize].1;
-            let cap_scale = if scale > self.frame.height/2. {
-                self.frame.height/2.
+            let zbuffer = draw_buffer[draw_index as usize].1;
+            let scale = 8. * 1600. / zbuffer;
+            let cap_scale = if scale > self.frame.height / 2. || zbuffer == -1. {
+                self.frame.height / 2.
+            } else if scale < 0. {
+                0.
             } else {
                 scale
             };
@@ -102,6 +105,40 @@ impl GameScreen {
                     a: 1.0,
                 },
             );
+
+            if zbuffer == -1. {
+                macroquad::prelude::draw_rectangle(
+                    draw_index,
+                    self.frame.height / 2.,
+                    1.,
+                    self.frame.height / 2.,
+                    macroquad::prelude::WHITE,
+                );
+                macroquad::prelude::draw_rectangle(
+                    draw_index,
+                    0.,
+                    1.,
+                    self.frame.height / 2.,
+                    macroquad::prelude::SKYBLUE,
+                );
+            } else {
+                macroquad::prelude::draw_rectangle(
+                    draw_index,
+                    self.frame.height / 2. + cap_scale,
+                    1.,
+                    self.frame.height / 2. - cap_scale,
+                    macroquad::prelude::WHITE,
+                );
+
+                macroquad::prelude::draw_rectangle(
+                    draw_index,
+                    0.,
+                    1.,
+                    self.frame.height / 2. - cap_scale,
+                    macroquad::prelude::SKYBLUE,
+                );
+            }
+
             draw_index += 1.;
         }
     }
