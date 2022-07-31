@@ -6,11 +6,14 @@ pub struct Point {
 
 pub type Vector = Point;
 
-// outcodes for cohen
-const CLIPLEFT: i32 = 1;
-const CLIPRIGHT: i32 = 2;
-const CLIPLOWER: i32 = 4;
-const CLIPUPPER: i32 = 8;
+#[derive(PartialEq, PartialOrd)]
+enum CohenClip {
+    None = 0,
+    Left = 1,
+    Right = 2,
+    Lower = 4,
+    Upper = 8,
+}
 
 #[derive(Debug)]
 pub struct Polygon {
@@ -21,39 +24,39 @@ pub struct Polygon {
 impl Polygon {
     // cohen like
     pub fn clip_line(&mut self, (min_y, max_y): (f32, f32)) -> bool {
-        let mut start_flag = 0;
-        let mut end_flag = 0;
-
-        if self.start.y < min_y {
-            start_flag = CLIPLEFT;
+        let start_flag = if self.start.y < min_y {
+            CohenClip::Left
         } else if self.start.y > max_y {
-            start_flag = CLIPRIGHT;
-        }
-        if self.end.y < min_y {
-            end_flag = CLIPLEFT;
+            CohenClip::Right
+        } else {
+            CohenClip::None
+        };
+        let end_flag = if self.end.y < min_y {
+            CohenClip::Left
         } else if self.end.y > max_y {
-            end_flag = CLIPRIGHT;
-        }
+            CohenClip::Right
+        } else {
+            CohenClip::None
+        };
 
-        // both points are inside the line
-        if (start_flag | end_flag) == 0 {
-            return true;
-        }
-        // both points are on the same side
-        // if their & result is not 0
-        else if (start_flag & end_flag) != 0 {
-            return false;
-        }
+        match (&start_flag, &end_flag) {
+            (CohenClip::None, CohenClip::None) => return true,
+            (CohenClip::Left, CohenClip::Left) | (CohenClip::Right, CohenClip::Right) => {
+                return false
+            }
+            _ => {}
+        };
+
         // At least one of the points is not in the range
-        if (start_flag & CLIPLEFT) != 0 {
+        if start_flag == CohenClip::Left {
             self.start.y = min_y;
-        } else if (start_flag & CLIPRIGHT) != 0 {
+        } else if start_flag == CohenClip::Right {
             self.start.y = max_y;
         }
 
-        if (end_flag & CLIPLEFT) != 0 {
+        if end_flag == CohenClip::Left {
             self.end.y = min_y;
-        } else if (end_flag & CLIPRIGHT) != 0 {
+        } else if end_flag == CohenClip::Right {
             self.end.y = max_y;
         }
 
@@ -70,14 +73,14 @@ impl Polygon {
 
         // start point
         if p_y < min_y {
-            code = CLIPLOWER;
+            code = CohenClip::Lower as i32;
         } else if p_y > max_y {
-            code = CLIPUPPER;
+            code = CohenClip::Upper as i32;
         }
         if p_x < min_x {
-            code |= CLIPLEFT;
+            code |= CohenClip::Left as i32;
         } else if p_x > max_x {
-            code |= CLIPRIGHT;
+            code |= CohenClip::Right as i32;
         }
 
         code
@@ -117,16 +120,16 @@ impl Polygon {
             let y0 = self.start.y;
             let y1 = self.end.y;
 
-            if outcode & CLIPUPPER != 0 {
+            if outcode & CohenClip::Upper as i32 != 0 {
                 x = x0 + (x1 - x0) * (max_y - y0) / (y1 - y0);
                 y = max_y;
-            } else if outcode & CLIPLOWER != 0 {
+            } else if outcode & CohenClip::Lower as i32 != 0 {
                 x = x0 + (x1 - x0) * (min_y - y0) / (y1 - y0);
                 y = min_y;
-            } else if outcode & CLIPRIGHT != 0 {
+            } else if outcode & CohenClip::Right as i32 != 0 {
                 y = y0 + (y1 - y0) * (max_x - x0) / (x1 - x0);
                 x = max_x;
-            } else if outcode & CLIPLEFT != 0 {
+            } else if outcode & CohenClip::Left as i32 != 0 {
                 y = y0 + (y1 - y0) * (min_x - x0) / (x1 - x0);
                 x = min_x;
             }
