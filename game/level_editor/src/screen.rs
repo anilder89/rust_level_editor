@@ -281,29 +281,27 @@ impl SplitScreen {
             self.top_screen.game_state.player.position.y;
 
         // TODO: This is kind of brute force sync needs to be improved
-        let mut new_walls: Vec<game::Wall> = Vec::new();
-        self.bottom_screen
+        self.top_screen.game_state.walls = self
+            .bottom_screen
             .level_state
             .lines
             .iter()
-            .for_each(|wall| {
-                new_walls.push(game::Wall {
-                    start: game::GamePoint {
-                        x: wall.start.x,
-                        y: wall.start.y,
-                    },
-                    end: game::GamePoint {
-                        x: wall.end.x,
-                        y: wall.end.y,
-                    },
-                    color: game::Color {
-                        r: wall.color.r,
-                        g: wall.color.g,
-                        b: wall.color.b,
-                    },
-                });
-            });
-        self.top_screen.game_state.walls = new_walls;
+            .map(|wall| game::Wall {
+                start: game::GamePoint {
+                    x: wall.start.x,
+                    y: wall.start.y,
+                },
+                end: game::GamePoint {
+                    x: wall.end.x,
+                    y: wall.end.y,
+                },
+                color: game::Color {
+                    r: wall.color.r,
+                    g: wall.color.g,
+                    b: wall.color.b,
+                },
+            })
+            .collect();
     }
 }
 
