@@ -1,7 +1,7 @@
 use super::basics::{Player, Point, Vector};
 // for the level editor it is fine to use
 // the macroquad lib as much as possibble
-use macroquad::prelude::{Color, GREEN};
+use macroquad::prelude::{Color, BLUE, GREEN, RED};
 
 pub const NR: f32 = 5.;
 pub const NS: i32 = -1;
@@ -53,6 +53,7 @@ pub struct LevelState {
 impl LevelState {
     // input is a left click on the level screen
     pub fn left_on(&mut self, position: LevelPoint) {
+        let colors = vec![RED, BLUE, GREEN];
         // is it on an empty space?
         // create a phantom node
         let p_node = Node {
@@ -94,7 +95,7 @@ impl LevelState {
                     self.lines.push(Line {
                         start: start_position,
                         end: end_position,
-                        color: GREEN,
+                        color: colors[self.lines.len() % colors.len()],
                     });
 
                     // reset cycle

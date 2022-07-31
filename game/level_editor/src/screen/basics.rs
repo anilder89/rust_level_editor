@@ -20,7 +20,7 @@ pub struct Polygon {
 
 impl Polygon {
     // cohen like
-    pub fn _clip_line(&mut self, (min_y, max_y): (f32, f32)) -> bool {
+    pub fn clip_line(&mut self, (min_y, max_y): (f32, f32)) -> bool {
         let mut start_flag = 0;
         let mut end_flag = 0;
 
@@ -365,7 +365,7 @@ mod test {
                 },
             };
 
-            let calculated_result = calculated_p_result._clip_line((-near, near));
+            let calculated_result = calculated_p_result.clip_line((-near, near));
             assert_eq!(
                 calculated_result, results_to_test[index],
                 "Boolean error for {}, result being: {} at index {}",

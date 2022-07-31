@@ -7,11 +7,11 @@ const PLYSPD: f32 = 5.0;
 
 pub type GamePlayer = Player;
 pub type GamePoint = Point;
-
+#[derive(Clone, Copy, Debug)]
 pub struct Color {
-    pub r: i16,
-    pub g: i16,
-    pub b: i16,
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
 }
 
 pub struct Wall {
@@ -79,39 +79,90 @@ impl GameState {
         }
     }
 
-    pub fn render(&self, screen: &GameScreen, near: f32) -> Vec<f32> {
+    pub fn render(&self, screen: &GameScreen, near: f32, far: f32) -> Vec<(Color, f32)> {
         // prep draw buffer for the screen size, we just draw into x direction
-        let draw_buffer = vec![0.; screen.frame.width as usize];
+        let mut draw_buffer = vec![
+            (
+                Color {
+                    r: 0.,
+                    b: 0.,
+                    g: 0.
+                },
+                -1.
+            );
+            screen.frame.width as usize
+        ];
+
         // transform everything with the (player to the origin) vector
-        let origin = Vector { x: 0., y: 0. };
-        let player_position = Vector {
-            x: self.player.position.x,
-            y: self.player.position.y,
-        };
-        let (trans_x, trans_y) = player_position.trans(&origin);
-        // rotate everything the same amount as the player to face x drc (having angle 0)
-        let rot_a = -self.player.angle;
+        let (trans_x, trans_y) = self.player.position.trans(&Vector { x: 0., y: 0. });
 
         self.walls.iter().for_each(|wall| {
             let mut wall_start = Vector {
-                x: wall.start.x + trans_x,
-                y: wall.start.y + trans_y,
+                x: wall.start.x - trans_x,
+                y: wall.start.y - trans_y,
             };
-            wall_start.rotate(rot_a);
+            wall_start.rotate(-self.player.angle);
 
             let mut wall_end = Vector {
-                x: wall.end.x + trans_x,
-                y: wall.end.y + trans_y,
+                x: wall.end.x - trans_x,
+                y: wall.end.y - trans_y,
             };
-            wall_end.rotate(rot_a);
+            wall_end.rotate(-self.player.angle);
 
-            // calculate intersection points on the screen
-            let _y_s_i = near * wall_start.y / wall_start.x;
-            let _y_e_i = near * wall_end.y / wall_end.x;
+            let mut wall_poly = Polygon {
+                start: Vector {
+                    x: wall_start.x,
+                    y: wall_start.y,
+                },
+                end: Vector {
+                    x: wall_end.x,
+                    y: wall_end.y,
+                },
+            };
 
-            // calculate near-screen to pixel size
-            // screen size 2*near for fov=1, between -near and near
-            // let pixel_size = screen.frame.width / (2. * near);
+            // clip everything behind and too far
+            if wall_poly.clip_cohen((near, far), (-far / 2., far / 2.)) {
+                let (real_wall_start, real_wall_end) = if wall_poly.end.y > wall_poly.start.y {
+                    (wall_poly.start, wall_poly.end)
+                } else {
+                    (wall_poly.end, wall_poly.start)
+                };
+
+                // calculate intersection points on the screen
+                let y_s_i = near * real_wall_start.y / real_wall_start.x;
+                let y_e_i = near * real_wall_end.y / real_wall_end.x;
+
+                // for abs interpolation
+                let d_X = real_wall_end.x - real_wall_start.x;
+                let d_Y = real_wall_end.y - real_wall_start.y;
+
+                // clip the projection to screen size
+                let mut clip_screen = Polygon {
+                    start: Point { x: near, y: y_s_i },
+                    end: Point { x: near, y: y_e_i },
+                };
+                if clip_screen.clip_line((-near, near)) {
+                    // calculate near-screen to pixel size
+                    // screen size 2*near for fov=1, between -near and near
+                    let pixel_size = screen.frame.width / (2. * near);
+                    let pixel_start = clip_screen.start.y * pixel_size;
+                    let pixel_end = clip_screen.end.y * pixel_size;
+
+                    let mut pixel = pixel_start;
+                    while pixel < pixel_end {
+                        let k = (pixel / pixel_size) / near;
+                        let p_abs =
+                            (real_wall_start.y - real_wall_start.x * d_Y / d_X) / (k - d_Y / d_X);
+                        let pixel_index = (pixel + screen.frame.width / 2.) as usize;
+
+                        if draw_buffer[pixel_index].1 == -1. || draw_buffer[pixel_index].1 > p_abs {
+                            draw_buffer[pixel_index].1 = p_abs;
+                            draw_buffer[pixel_index].0 = wall.color;
+                        }
+                        pixel += 1.;
+                    }
+                } 
+            }
         });
         draw_buffer
     }
@@ -123,46 +174,153 @@ mod test {
 
     #[test]
     fn rendering() {
-        todo!("Fill me!");
-    }
-    #[test]
-    fn player_movement() {
+        // load level
+        // TODO: load level from file
         let test_level = GameState {
             walls: vec![
                 Wall {
                     start: Point { x: -125.0, y: 77.0 },
                     end: Point { x: -89.0, y: -14.0 },
-                    color: Color { r: 0, g: 0, b: 0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
                 },
                 Wall {
                     start: Point { x: -89.0, y: -14.0 },
                     end: Point { x: -33.0, y: -74.0 },
-                    color: Color { r: 0, g: 0, b: 0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
                 },
                 Wall {
                     start: Point { x: -33.0, y: -74.0 },
                     end: Point { x: 56.0, y: -128.0 },
-                    color: Color { r: 0, g: 0, b: 0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
                 },
                 Wall {
                     start: Point { x: 56.0, y: -128.0 },
                     end: Point { x: 125.0, y: -16.0 },
-                    color: Color { r: 0, g: 0, b: 0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
                 },
                 Wall {
                     start: Point { x: 125.0, y: -16.0 },
                     end: Point { x: 171.0, y: 58.0 },
-                    color: Color { r: 0, g: 0, b: 0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
                 },
                 Wall {
                     start: Point { x: 171.0, y: 58.0 },
                     end: Point { x: 75.0, y: 77.0 },
-                    color: Color { r: 0, g: 0, b: 0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
                 },
                 Wall {
                     start: Point { x: -22.0, y: 76.0 },
                     end: Point { x: -125.0, y: 77.0 },
-                    color: Color { r: 0, g: 0, b: 0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
+                },
+            ],
+            player: Player {
+                position: Point { x: 0.0, y: 0.0 },
+                angle: 0.0,
+            },
+        };
+
+        // check total number of pixels, should be screen.width
+        // check pixel generated into player direction, should be all "FULL"
+        // check pixel generated into y direction, some should be "EMPTY"
+        todo!("See comments!");
+    }
+    #[test]
+    fn player_movement() {
+        // load level
+        // TODO: load level from file
+        let test_level = GameState {
+            walls: vec![
+                Wall {
+                    start: Point { x: -125.0, y: 77.0 },
+                    end: Point { x: -89.0, y: -14.0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
+                },
+                Wall {
+                    start: Point { x: -89.0, y: -14.0 },
+                    end: Point { x: -33.0, y: -74.0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
+                },
+                Wall {
+                    start: Point { x: -33.0, y: -74.0 },
+                    end: Point { x: 56.0, y: -128.0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
+                },
+                Wall {
+                    start: Point { x: 56.0, y: -128.0 },
+                    end: Point { x: 125.0, y: -16.0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
+                },
+                Wall {
+                    start: Point { x: 125.0, y: -16.0 },
+                    end: Point { x: 171.0, y: 58.0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
+                },
+                Wall {
+                    start: Point { x: 171.0, y: 58.0 },
+                    end: Point { x: 75.0, y: 77.0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
+                },
+                Wall {
+                    start: Point { x: -22.0, y: 76.0 },
+                    end: Point { x: -125.0, y: 77.0 },
+                    color: Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                    },
                 },
             ],
             player: Player {

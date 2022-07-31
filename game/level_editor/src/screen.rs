@@ -66,17 +66,42 @@ impl GameScreen {
 
     pub fn draw(&self) {
         let mut draw_index = 0.;
-        let draw_buffer = self.game_state.render(self, 10.);
+        let draw_buffer = self.game_state.render(self, 10.,400.);
 
         // the size is "fix"
         while draw_index < self.frame.width {
-            let mut color = macroquad::prelude::BLACK;
-            if draw_buffer[draw_index as usize] > 0. {
-                color = macroquad::prelude::BLUE;
-            }
-
+            let buffer_color = draw_buffer[draw_index as usize].0;
             // draw left to right
-            macroquad::prelude::draw_rectangle(draw_index, 0., 1., 100., color);
+            let scale= 8. * 1600. / draw_buffer[draw_index as usize].1;
+            let cap_scale = if scale > self.frame.height/2. {
+                self.frame.height/2.
+            } else {
+                scale
+            };
+            macroquad::prelude::draw_rectangle(
+                draw_index,
+                self.frame.height / 2.,
+                1.,
+                -cap_scale,
+                macroquad::prelude::Color {
+                    r: buffer_color.r,
+                    g: buffer_color.g,
+                    b: buffer_color.b,
+                    a: 1.0,
+                },
+            );
+            macroquad::prelude::draw_rectangle(
+                draw_index,
+                self.frame.height / 2.,
+                1.,
+                cap_scale,
+                macroquad::prelude::Color {
+                    r: buffer_color.r,
+                    g: buffer_color.g,
+                    b: buffer_color.b,
+                    a: 1.0,
+                },
+            );
             draw_index += 1.;
         }
     }
@@ -271,9 +296,9 @@ impl SplitScreen {
                         y: wall.end.y,
                     },
                     color: game::Color {
-                        r: wall.color.r as i16,
-                        g: wall.color.g as i16,
-                        b: wall.color.b as i16,
+                        r: wall.color.r,
+                        g: wall.color.g,
+                        b: wall.color.b,
                     },
                 });
             });
