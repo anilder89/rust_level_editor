@@ -27,10 +27,11 @@ pub struct GameState {
 
 impl GameState {
     pub fn player_can_move(&self, new_position: &Point) -> bool {
-        let mut hits_some_wall = false;
-        self.walls.iter().for_each(|wall| {
-            hits_some_wall = hits_some_wall
-                || self.player.hits_polygon(
+        let hits_some_wall = self
+            .walls
+            .iter()
+            .map(|wall| {
+                self.player.hits_polygon(
                     new_position,
                     &Polygon {
                         start: Point {
@@ -42,8 +43,10 @@ impl GameState {
                             y: wall.end.y,
                         },
                     },
-                );
-        });
+                )
+            })
+            .any(|hit| hit);
+
         !hits_some_wall
     }
 }
@@ -153,20 +156,20 @@ impl GameState {
                     } else {
                         (pixel_end, pixel_start)
                     };
-                        while pixel < limit {
-                            let k = (pixel / pixel_size) / near;
-                            let p_abs = (real_wall_start.y - real_wall_start.x * d_y / d_x)
-                                / (k - d_y / d_x);
-                            let pixel_index = (pixel + screen.frame.width / 2.) as usize;
+                    while pixel < limit {
+                        let k = (pixel / pixel_size) / near;
+                        let p_abs =
+                            (real_wall_start.y - real_wall_start.x * d_y / d_x) / (k - d_y / d_x);
+                        let pixel_index = (pixel + screen.frame.width / 2.) as usize;
 
-                            if draw_buffer[pixel_index].1 + 1. < f32::EPSILON
-                                || draw_buffer[pixel_index].1 > p_abs
-                            {
-                                draw_buffer[pixel_index].1 = p_abs;
-                                draw_buffer[pixel_index].0 = wall.color;
-                            }
-                            pixel += 1.;
+                        if draw_buffer[pixel_index].1 + 1. < f32::EPSILON
+                            || draw_buffer[pixel_index].1 > p_abs
+                        {
+                            draw_buffer[pixel_index].1 = p_abs;
+                            draw_buffer[pixel_index].0 = wall.color;
                         }
+                        pixel += 1.;
+                    }
                 }
             }
         });

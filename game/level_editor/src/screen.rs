@@ -66,15 +66,15 @@ impl GameScreen {
 
     pub fn draw(&self) {
         let mut draw_index = 0.;
-        let draw_buffer = self.game_state.render(self, 10.,800.);
+        let draw_buffer = self.game_state.render(self, 10., 800.);
 
         // the size is "fix"
         while draw_index < self.frame.width {
             let buffer_color = draw_buffer[draw_index as usize].0;
             // draw left to right
-            let scale= 8. * 1600. / draw_buffer[draw_index as usize].1;
-            let cap_scale = if scale > self.frame.height/2. {
-                self.frame.height/2.
+            let scale = 8. * 1600. / draw_buffer[draw_index as usize].1;
+            let cap_scale = if scale > self.frame.height / 2. {
+                self.frame.height / 2.
             } else {
                 scale
             };
