@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 
 // prep level editor screens
 mod screen;
-use screen::{Button, GameScreen, Key, LevelScreen, Mouse, ScreenPoint, SplitScreen};
+use screen::{Button, GameScreen, Key, LevelScreen, Mouse, ScreenPoint, SplitScreen, testlevel};
 
 fn window_conf() -> Conf {
     Conf {
@@ -32,6 +32,9 @@ async fn main() {
     let level_screen = LevelScreen::new(width, split_position);
     // init split screen
     let mut split_screen = SplitScreen::new(game_screen, level_screen, split_position);
+    
+    // load test level
+    split_screen.bottom_screen.level_state = testlevel::return_test_level();
 
     loop {
         /////////////////////////////////////////////////////

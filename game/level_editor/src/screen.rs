@@ -20,6 +20,9 @@ const PLYY: f32 = 0.;
 const PLYA: f32 = 0.;
 const LT: f32 = 5.;
 
+// use the test level
+pub mod testlevel;
+
 // add basic definitions for main
 pub enum Key {
     Up,
@@ -66,7 +69,7 @@ impl GameScreen {
 
     pub fn draw(&self) {
         let mut draw_index = 0.;
-        let draw_buffer = self.game_state.render(self, 10., 800.);
+        let draw_buffer = self.game_state.render(self, 10., 1400.);
 
         // the size is "fix"
         while draw_index < self.frame.width {
@@ -344,7 +347,7 @@ impl SplitScreen {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     #[test]
     fn coord_screen() {
         todo!("Fill me!");

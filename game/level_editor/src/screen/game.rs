@@ -173,85 +173,13 @@ impl GameState {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]
     fn rendering() {
         // load level
         // TODO: load level from file
-        let _test_level = GameState {
-            walls: vec![
-                Wall {
-                    start: Point { x: -125.0, y: 77.0 },
-                    end: Point { x: -89.0, y: -14.0 },
-                    color: Color {
-                        r: 0.,
-                        g: 0.,
-                        b: 0.,
-                    },
-                },
-                Wall {
-                    start: Point { x: -89.0, y: -14.0 },
-                    end: Point { x: -33.0, y: -74.0 },
-                    color: Color {
-                        r: 0.,
-                        g: 0.,
-                        b: 0.,
-                    },
-                },
-                Wall {
-                    start: Point { x: -33.0, y: -74.0 },
-                    end: Point { x: 56.0, y: -128.0 },
-                    color: Color {
-                        r: 0.,
-                        g: 0.,
-                        b: 0.,
-                    },
-                },
-                Wall {
-                    start: Point { x: 56.0, y: -128.0 },
-                    end: Point { x: 125.0, y: -16.0 },
-                    color: Color {
-                        r: 0.,
-                        g: 0.,
-                        b: 0.,
-                    },
-                },
-                Wall {
-                    start: Point { x: 125.0, y: -16.0 },
-                    end: Point { x: 171.0, y: 58.0 },
-                    color: Color {
-                        r: 0.,
-                        g: 0.,
-                        b: 0.,
-                    },
-                },
-                Wall {
-                    start: Point { x: 171.0, y: 58.0 },
-                    end: Point { x: 75.0, y: 77.0 },
-                    color: Color {
-                        r: 0.,
-                        g: 0.,
-                        b: 0.,
-                    },
-                },
-                Wall {
-                    start: Point { x: -22.0, y: 76.0 },
-                    end: Point { x: -125.0, y: 77.0 },
-                    color: Color {
-                        r: 0.,
-                        g: 0.,
-                        b: 0.,
-                    },
-                },
-            ],
-            player: Player {
-                position: Point { x: 0.0, y: 0.0 },
-                angle: 0.0,
-            },
-        };
-
         // check total number of pixels, should be screen.width
         // check pixel generated into player direction, should be all "FULL"
         // check pixel generated into y direction, some should be "EMPTY"

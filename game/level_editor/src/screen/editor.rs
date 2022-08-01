@@ -138,7 +138,7 @@ impl LevelState {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     #[test]
     fn import_level() {
         todo!("Fill me!");
